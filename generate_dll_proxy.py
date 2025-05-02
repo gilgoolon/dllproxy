@@ -68,8 +68,10 @@ def main():
 
     files = {
         "Main.cpp": {
-            "WORKER_PATH": format_code_path(worker_dll),
             "EXPORT_STUBS": "\n".join(export_stubs)
+        },
+        "Config.cpp": {
+            "WORKER_PATH": format_code_path(worker_dll)
         },
         "Source.def": {
             "LIBRARY_NAME": source_dll.name
