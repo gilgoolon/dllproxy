@@ -1,10 +1,10 @@
-# DLL Proxy Generator
+# dllproxy
 
 A tool for generating Windows DLL proxies with automatic export forwarding.
 
 ---
 
-Now available as a [PyPI package](https://pypi.org/project/dll-proxy-generator/)!
+Now available as a [PyPI package](https://pypi.org/project/dllproxy/)!
 
 ## Overview
 
@@ -87,14 +87,19 @@ dll-proxy-generator -s C:\Windows\System32\kernel32.dll -d C:\Windows\System32\m
 | `-b`, `--build` | Build the project after generation |
 | `-p`, `--platform` | Target platform (x86 or x64, default: x64) |
 
-## Project Structure
+## Proxy Features
 
-The generated proxy project includes:
+### Forever Retries
+The DLL keeps a worker thread alive forever - trying to start the destination DLL.
 
-- **Visual Studio solution and project files**
-- **Exports definition file** with all the original DLL's exports
-- **Source code** for the proxy implementation
-- **Configuration header** for customization
+### Mutex Synchornization
+A system-wide mutex (with a constant GUID) is used to make sure the destination dll only has One instance loaded at a time. 
+
+### Library Name
+Source.def decalres the name of the source DLL name.
+
+### Protections
+Protections are used to catch exceptions from the worker dll to make the proxy safe.
 
 ## Customizing the Proxy
 
@@ -126,7 +131,7 @@ BOOL WINAPI CreateProcessW_Proxy(/* parameters */) {
 To deploy your proxy:
 
 1. Build the proxy DLL
-2. Rename the original DLL to match your worker DLL path
+2. Rename the original DLL to match your worker DLL path if needed
 3. Place your proxy DLL in the original location
 4. The application will now load your proxy instead
 
