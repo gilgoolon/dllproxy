@@ -70,7 +70,7 @@ def main():
         "Main.cpp": {
             "EXPORT_STUBS": "\n".join(export_stubs)
         },
-        "Config.cpp": {
+        "Config.hpp": {
             "WORKER_PATH": format_code_path(worker_dll)
         },
         "Source.def": {
