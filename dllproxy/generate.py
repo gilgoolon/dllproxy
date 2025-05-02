@@ -5,8 +5,9 @@ import shutil
 import argparse
 from typing import Dict
 from pathlib import Path
+from importlib.resources import files
 
-TEMPLATE_DIR = "template"
+TEMPLATE_DIR = files("dllproxy").joinpath("template")
 VARIABLES = [
     "PROXY_TARGET_DLL",
     "EXPORT_STUBS",

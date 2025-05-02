@@ -1,0 +1,1 @@
+from .generate import main as dllproxy_generate
