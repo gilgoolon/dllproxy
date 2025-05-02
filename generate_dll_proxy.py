@@ -1,4 +1,5 @@
 import os
+import tempfile
 import pefile
 import shutil
 import argparse
@@ -38,27 +39,45 @@ def replace_variables(contents, variables: Dict[str, str]) -> str:
         result = replace_variable(result, name, value)
     return result
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Generate a DLL proxy Visual Studio project.")
-
-    parser.add_argument("-s", "--source_dll", required=True, type=Path, help="Path to the source DLL to proxy")
-    parser.add_argument("-d", "--worker_dll", required=True, type=Path, help="Name of the DLL to load on startup")
-    parser.add_argument("-o", "--output_dir", required=True, type=Path, help="Directory where the new project will be generated")
-
-    return parser.parse_args()
-
 def format_code_path(path: Path) -> str:
     return path.absolute().as_posix()
 
+def build(solution_path: Path, configuration: str, platform: str):
+    os.system(f"msbuild {solution_path.as_posix()} /p:Configuration={configuration} /p:Platform={platform}")
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Generate a DLL proxy Visual Studio project.")
+
+    parser.add_argument("-s", "--source-dll", required=True, type=Path, help="Path to the source DLL to proxy")
+    parser.add_argument("-d", "--worker-dll", required=True, type=Path, help="Name of the DLL to load on startup")
+    parser.add_argument("-o", "--output", required=False, type=Path, help="If building, the output path. If generating, the directory where the new project will be generated")
+    parser.add_argument("-b", "--build", action="store_true", help="Build the project using msbuild instead of generating project files")
+    parser.add_argument("-p", "--platform", required=False, default="x64", type=str, help="Target platform")
+
+    return parser.parse_args()
 
 def main():
     args = parse_arguments()
 
     source_dll = args.source_dll
-    output_dir = args.output_dir
+    output = args.output
     worker_dll = args.worker_dll
+    platform = args.platform
 
-    copy_template(output_dir)
+    CONFIGURATION = "Release"
+
+    if args.build:
+        directory = tempfile.TemporaryDirectory()
+        project_dir = Path(directory.name)
+        if output is None:
+            output = source_dll.name
+    else:
+        project_dir = output
+        if output is None:
+            raise ValueError("Provide an output directory when generating a project")
+
+    copy_template(project_dir)
     exports = parse_exports(source_dll)
 
     export_stubs = [
@@ -79,12 +98,17 @@ def main():
     }
 
     for file, variables in files.items():
-        path = output_dir / file
+        path = project_dir / file
         contents = path.read_text()
         updated_contents = replace_variables(contents, variables)
         path.write_text(updated_contents)
 
-    print(f"Proxy DLL project generated at \"{output_dir.absolute()}\"")
+    print(f"Proxy DLL project generated at \"{project_dir.absolute()}\"")
+
+    if args.build:
+        build(project_dir / "DllProxy.sln", CONFIGURATION, platform)
+        shutil.copy(project_dir / platform / CONFIGURATION / "DllProxy.dll", output)
+        print(f"Build completed successfully, target is at \"{output}\"")
 
 if __name__ == "__main__":
     main()
