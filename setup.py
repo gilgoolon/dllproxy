@@ -7,7 +7,7 @@ setup(
     version="0.1",
     description="Generate And Build a Windows DLL Proxy For Any DLL",
     license="MIT",
-    long_description=Path("README.md").read_text(),
+    readme="README.md",
     author="Gil Alpert",
     author_email="alpertgil@gmail.com",
     url="https://github.com/gilgoolon/dllproxy",
