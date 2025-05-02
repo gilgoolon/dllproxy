@@ -1,16 +1,31 @@
-﻿#include <Windows.h>
+﻿#include "Library.hpp"
+
+#include <memory>
+#include <Windows.h>
+
+static constexpr auto WORKER_PATH = L"%WORKER_PATH%";
+static std::unique_ptr<Library> g_worker = nullptr;
 
 BOOL WINAPI DllMain([[maybe_unused]] HINSTANCE instance,
                     [[maybe_unused]] const DWORD reason,
                     [[maybe_unused]] DWORD reserved)
 {
-	if (reason == DLL_PROCESS_ATTACH)
+	try
 	{
-		MessageBoxW(nullptr, L"SimpleDll loaded", L"SimpleDll", 0);
+		if (reason == DLL_PROCESS_ATTACH)
+		{
+			g_worker = std::make_unique<Library>(WORKER_PATH);
+		}
+		if (reason == DLL_PROCESS_DETACH)
+		{
+			g_worker.reset();
+		}
+		return TRUE;
 	}
-	if (reason == DLL_PROCESS_DETACH)
+	catch (...)
 	{
-		MessageBoxW(nullptr, L"SimpleDll unloaded", L"SimpleDll", 0);
 	}
-	return TRUE;
+	return FALSE;
 }
+
+%EXPORT_STUBS%

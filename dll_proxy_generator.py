@@ -1,7 +1,9 @@
 import os
-import shutil
 import pefile
+import shutil
 import argparse
+from typing import Dict
+from pathlib import Path
 
 TEMPLATE_DIR = "template"
 VARIABLES = [
@@ -10,6 +12,11 @@ VARIABLES = [
     "REAL_FUNCTION_DECLS",
     "REAL_FUNCTION_ASSIGNMENTS"
 ]
+
+def copy_template(output_dir):
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    shutil.copytree(TEMPLATE_DIR, output_dir)
 
 def parse_exports(dll_path):
     pe = pefile.PE(dll_path)
@@ -21,93 +28,61 @@ def parse_exports(dll_path):
             exported_functions.append((name, ordinal))
     return exported_functions
 
-def copy_template(output_dir):
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    shutil.copytree(TEMPLATE_DIR, output_dir)
+def replace_variable(contents: str, name: str, value: str) -> str:
+    variable_reference = f"%{name}%"
+    return contents.replace(variable_reference, value)
 
-def render_template_file(file_path, substitutions):
-    with open(file_path, "rt", encoding="utf-8") as f:
-        content = f.read()
-    for key, value in substitutions.items():
-        content = content.replace("${" + key + "}", value)
-    with open(file_path, "wt", encoding="utf-8") as f:
-        f.write(content)
+def replace_variables(contents, variables: Dict[str, str]) -> str:
+    result = contents
+    for name, value in variables.items():
+        result = replace_variable(result, name, value)
+    return result
 
-def fill_all_templates(output_dir, substitutions):
-    # Only replace in .cpp, .h, .vcxproj, .sln, .filters, etc.
-    for root, _, files in os.walk(output_dir):
-        for filename in files:
-            ext = os.path.splitext(filename)[-1].lower()
-            if ext in (".cpp", ".h", ".vcxproj", ".sln", ".filters", ".txt", ".def"):
-                path = os.path.join(root, filename)
-                render_template_file(path, substitutions)
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Generate a DLL proxy Visual Studio project.")
 
-def generate_stubs(exports):
-    """Returns (EXPORT_STUBS, REAL_FUNCTION_DECLS, REAL_FUNCTION_ASSIGNMENTS)"""
-    decls = []
-    assigns = []
-    stubs = []
-    for name, _ in exports:
-        decls.append(f"static FARPROC _real_{name} = nullptr;")
-        assigns.append(f'_real_{name} = _load_real_function(kProxyTarget, "{name}");')
-        stubs.append(f'''
-extern "C" __declspec(naked) void {name}()
-{{
-    __asm {{
-        pushad
-        pushfd
-        mov eax, offset _real_{name}
-        test eax, eax
-        jz load_real_functions
-        jmp eax
-    load_real_functions:
-        push offset kProxyTarget
-        call _load_real_functions
-        mov eax, offset _real_{name}
-        jmp eax
-        popfd
-        popad
-    }}
-}}
-''')
-    return ("\n".join(stubs), "\n".join(decls), "\n    ".join(assigns))
+    parser.add_argument("-s", "--source_dll", required=True, type=Path, help="Path to the source DLL to proxy")
+    parser.add_argument("-d", "--worker_dll", required=True, type=Path, help="Name of the DLL to load on startup")
+    parser.add_argument("-o", "--output_dir", required=True, type=Path, help="Directory where the new project will be generated")
+
+    return parser.parse_args()
+
+def format_code_path(path: Path) -> str:
+    return path.absolute().as_posix()
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate a DLL proxy Visual Studio project from a template.")
-    parser.add_argument("source_dll", help="Path to the source DLL to proxy")
-    parser.add_argument("output_dir", help="Directory where the new project will be generated")
-    parser.add_argument("--dll-name", help="Name of the DLL to forward functions to (defaults to source DLL name)")
-    args = parser.parse_args()
+    args = parse_arguments()
 
-    source_dll = os.path.abspath(args.source_dll)
-    output_dir = os.path.abspath(args.output_dir)
-    dll_name = args.dll_name or os.path.basename(args.source_dll)
+    source_dll = args.source_dll
+    output_dir = args.output_dir
+    worker_dll = args.worker_dll
 
-    # 1. Copy template project
     copy_template(output_dir)
-
-    # 2. Parse PE exports
     exports = parse_exports(source_dll)
-    if not exports:
-        print(f"No exports found in '{source_dll}'.")
-        return
 
-    # 3. Produce stub section as per template's expected variable names
-    export_stubs, real_function_decls, real_function_assigns = generate_stubs(exports)
+    export_stubs = [
+        f"#pragma comment(linker,\"/export:{name}={format_code_path(source_dll)}.{name},@{ordinal}\")"
+        for (name, ordinal) in exports
+    ]
 
-    # 4. Prepare variables for placeholders
-    substitutions = {
-        "PROXY_TARGET_DLL": f'L"{dll_name}"',
-        "EXPORT_STUBS": export_stubs,
-        "REAL_FUNCTION_DECLS": real_function_decls,
-        "REAL_FUNCTION_ASSIGNMENTS": real_function_assigns,
+    files = {
+        "Main.cpp": {
+            "WORKER_PATH": format_code_path(worker_dll),
+            "EXPORT_STUBS": "\n".join(export_stubs)
+        },
+        "Source.def": {
+            "LIBRARY_NAME": source_dll.name
+        }
     }
 
-    # 5. Replace variables in all text/code files in the copied template
-    fill_all_templates(output_dir, substitutions)
+    for file, variables in files.items():
+        path = output_dir / file
+        contents = path.read_text()
+        updated_contents = replace_variables(contents, variables)
+        path.write_text(updated_contents)
 
-    print(f"Proxy DLL project generated at: {output_dir}")
+    print(f"Proxy DLL project generated at \"{output_dir.absolute()}\"")
 
 if __name__ == "__main__":
     main()
