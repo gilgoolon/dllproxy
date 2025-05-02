@@ -1,5 +1,7 @@
 ﻿#include "Library.hpp"
 
+#include "Exception.hpp"
+
 #include <stdexcept>
 
 Library::Library(const std::wstring& path):
@@ -23,7 +25,7 @@ HMODULE Library::load_library(const std::wstring& path)
 	const HMODULE result = LoadLibraryW(path.c_str());
 	if (result == nullptr)
 	{
-		throw std::runtime_error("failed to load library");
+		throw WinApiException(ErrorCode::FAILED_LIBRARY_LOAD);
 	}
 	return result;
 }

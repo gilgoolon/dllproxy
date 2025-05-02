@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project=".props" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
       <Configuration>Debug</Configuration>
@@ -131,6 +132,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,6 +149,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +166,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -177,6 +181,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -191,6 +196,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -207,6 +213,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -225,6 +232,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -243,6 +251,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Framework/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -253,11 +262,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Library.cpp" />
+    <ClCompile Include="Framework\Event.cpp" />
+    <ClCompile Include="Framework\Exception.cpp" />
+    <ClCompile Include="Framework\IWaitable.cpp" />
+    <ClCompile Include="Framework\Library.cpp" />
+    <ClCompile Include="Framework\Mutex.cpp" />
+    <ClCompile Include="Framework\Protections\AbortBehavior.cpp" />
+    <ClCompile Include="Framework\Protections\ErrorMode.cpp" />
+    <ClCompile Include="Framework\Protections\InvalidParameter.cpp" />
+    <ClCompile Include="Framework\Protections\PureCall.cpp" />
+    <ClCompile Include="Framework\Protections\StructuredExceptionTranslator.cpp" />
+    <ClCompile Include="Framework\Protections\TerminationHandler.cpp" />
+    <ClCompile Include="Framework\Protections\UnhandledExceptionFilter.cpp" />
+    <ClCompile Include="Framework\Thread.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Framework\ScopedHandle.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Library.hpp" />
+    <ClInclude Include="Framework\ErrorCode.hpp" />
+    <ClInclude Include="Framework\Event.hpp" />
+    <ClInclude Include="Framework\Exception.hpp" />
+    <ClInclude Include="Framework\IRunner.hpp" />
+    <ClInclude Include="Framework\IWaitable.hpp" />
+    <ClInclude Include="Framework\Library.hpp" />
+    <ClInclude Include="Framework\Mutex.hpp" />
+    <ClInclude Include="Framework\Protections\AbortBehavior.hpp" />
+    <ClInclude Include="Framework\Protections\EntryPointProtector.hpp" />
+    <ClInclude Include="Framework\Protections\ErrorMode.hpp" />
+    <ClInclude Include="Framework\Protections\InvalidParameter.hpp" />
+    <ClInclude Include="Framework\Protections\LibraryProtector.hpp" />
+    <ClInclude Include="Framework\Protections\ProgramProtector.hpp" />
+    <ClInclude Include="Framework\Protections\PureCall.hpp" />
+    <ClInclude Include="Framework\Protections\StructuredExceptionTranslator.hpp" />
+    <ClInclude Include="Framework\Protections\TerminationHandler.hpp" />
+    <ClInclude Include="Framework\Protections\UnhandledExceptionFilter.hpp" />
+    <ClInclude Include="Framework\ScopedHandle.hpp" />
+    <ClInclude Include="Framework\Thread.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source.def" />

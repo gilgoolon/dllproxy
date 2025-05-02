@@ -1,10 +1,13 @@
-﻿#include "Library.hpp"
+﻿#include "Framework/Library.hpp"
+#include "Protections/ProgramProtector.hpp"
 
-#include <memory>
+#include <optional>
 #include <Windows.h>
 
+static std::optional<Protections::ProgramProtector> g_protector = std::nullopt;
+
 static constexpr auto WORKER_PATH = L"%WORKER_PATH%";
-static std::unique_ptr<Library> g_worker = nullptr;
+static std::optional<Library> g_worker = std::nullopt;
 
 BOOL WINAPI DllMain([[maybe_unused]] HINSTANCE instance,
                     [[maybe_unused]] const DWORD reason,
@@ -14,10 +17,12 @@ BOOL WINAPI DllMain([[maybe_unused]] HINSTANCE instance,
 	{
 		if (reason == DLL_PROCESS_ATTACH)
 		{
-			g_worker = std::make_unique<Library>(WORKER_PATH);
+			g_protector.emplace();
+			g_worker.emplace(WORKER_PATH);
 		}
 		if (reason == DLL_PROCESS_DETACH)
 		{
+			g_worker.reset();
 			g_worker.reset();
 		}
 		return TRUE;
