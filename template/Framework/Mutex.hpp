@@ -4,7 +4,7 @@
 
 #include <string>
 
-class Mutex final : IWaitable
+class Mutex final : public IWaitable
 {
 public:
 	explicit Mutex(const std::wstring& name);

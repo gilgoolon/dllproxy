@@ -32,6 +32,8 @@ public:
 
 	[[nodiscard]] WaitStatus wait(std::chrono::milliseconds timeout) const;
 
+	[[nodiscard]] WaitStatus checked_wait(std::chrono::milliseconds timeout) const;
+
 	static void sleep(std::chrono::milliseconds duration);
 
 	[[nodiscard]] static WaitResult wait_for_any(const std::vector<std::shared_ptr<IWaitable>>& objects,

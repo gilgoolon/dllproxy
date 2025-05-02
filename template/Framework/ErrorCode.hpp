@@ -14,6 +14,7 @@ enum class ErrorCode : uint32_t
 
 	// Library
 	FAILED_LIBRARY_LOAD,
+	FAILED_LIBRARY_GET,
 
 	// Events
 	FAILED_EVENT_OPEN,
@@ -26,6 +27,7 @@ enum class ErrorCode : uint32_t
 	// Mutex
 	FAILED_MUTEX_CREATE,
 	FAILED_MUTEX_ACQUIRE,
+	MUTEX_ALREADY_TAKEN,
 
 	// Thread
 	FAILED_THREAD_CREATE,

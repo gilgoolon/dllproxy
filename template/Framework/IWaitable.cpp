@@ -1,5 +1,7 @@
 ﻿#include "IWaitable.hpp"
 
+#include "Exception.hpp"
+
 static WaitStatus to_wait_status(const DWORD result)
 {
 	switch (result)
@@ -24,6 +26,28 @@ WaitStatus IWaitable::wait(const std::chrono::milliseconds timeout) const
 {
 	const DWORD result = WaitForSingleObject(handle(), static_cast<DWORD>(timeout.count()));
 	return to_wait_status(result);
+}
+
+WaitStatus IWaitable::checked_wait(const std::chrono::milliseconds timeout) const
+{
+	switch (const WaitStatus result = wait(timeout))
+	{
+	case WaitStatus::FINISHED:
+		[[fallthrough]];
+	case WaitStatus::TIMEOUT:
+	{
+		return result;
+	}
+
+	case WaitStatus::OBJECT_CLOSED:
+		[[fallthrough]];
+	case WaitStatus::FAILED:
+		[[fallthrough]];
+	default:
+	{
+		throw WinApiException(ErrorCode::FAILED_WAIT);
+	}
+	}
 }
 
 void IWaitable::sleep(const std::chrono::milliseconds duration)
