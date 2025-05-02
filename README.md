@@ -2,6 +2,10 @@
 
 A tool for generating Windows DLL proxies with automatic export forwarding.
 
+---
+
+Now available as a [PyPI package](https://pypi.org/project/dll-proxy-generator/)!
+
 ## Overview
 
 The DLL Proxy Generator creates fully functional Visual Studio C++ projects that can intercept calls to any Windows DLL. This enables various scenarios including:
@@ -23,26 +27,36 @@ DLL proxying works by creating a DLL with the same name and exports as the origi
 ## Requirements
 
 - **Windows operating system**
-- **Python 3.7+** with the `pefile` module
+- **Python 3.7+**
 - **Visual Studio** (for building the generated projects)
 
 ## Installation
 
+Install directly from PyPI:
+
+```bash
+pip install dllproxy
+```
+
+Alternatively, clone the source:
+
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/dll-proxy-generator.git
-cd dll-proxy-generator
+git clone https://github.com/gilgoolon/dllproxy.git
+cd dllproxy
 
-# Install required Python packages
-pip install pefile
+# Install the package
+pip install -e .
 ```
 
 ## Usage
 
-### Basic Usage
+### CLI Usage
+
+Once installed, you can use the `dllproxy-generate` command-line tool:
 
 ```bash
-python generate_dll_proxy.py -s <source_dll> -d <worker_dll> -o <output_directory>
+dllproxy-generate -s <source_dll> -d <worker_dll> -o <output_directory>
 ```
 
 Where:
@@ -50,11 +64,17 @@ Where:
 - `<worker_dll>` is the path where the original DLL will be relocated
 - `<output_directory>` is where the proxy project will be generated
 
+If you don't need the source or simply want to build, use:
+
+```bash
+dllproxy-generate -s <source_dll> -d <worker_dll> -b
+```
+
 ### Example
 
 ```bash
 # Generate a proxy for kernel32.dll
-python generate_dll_proxy.py -s C:\Windows\System32\kernel32.dll -d C:\Windows\System32\kernel32_original.dll -o .\KernelProxy
+dll-proxy-generator -s C:\Windows\System32\kernel32.dll -d C:\Windows\System32\malicious_dll.dll -o .\KernelProxy
 ```
 
 ### Command Line Options

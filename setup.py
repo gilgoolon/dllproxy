@@ -4,10 +4,11 @@ from setuptools import setup, find_packages
 
 setup(
     name="dllproxy",
-    version="0.1",
+    version="0.2",
     description="Generate And Build a Windows DLL Proxy For Any DLL",
     license="MIT",
-    readme="README.md",
+    long_description=Path("README.md").read_text(),
+    long_description_content_type="text/markdown",
     author="Gil Alpert",
     author_email="alpertgil@gmail.com",
     url="https://github.com/gilgoolon/dllproxy",
