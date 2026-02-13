@@ -41,7 +41,7 @@ def replace_variables(contents, variables: Dict[str, str]) -> str:
     return result
 
 def format_code_path(path: Path) -> str:
-    return path.absolute().as_posix()
+    return path.absolute().as_posix().replace("/", "\\\\")
 
 def build(solution_path: Path, configuration: str, platform: str):
     os.system(f"msbuild {solution_path.as_posix()} /p:Configuration={configuration} /p:Platform={platform}")
