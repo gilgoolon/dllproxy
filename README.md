@@ -90,7 +90,13 @@ dll-proxy-generator -s C:\Windows\System32\kernel32.dll -d C:\Windows\System32\m
 ## Proxy Features
 
 ### Forever Retries
-The DLL keeps a worker thread alive forever - trying to start the destination DLL.
+The DLL keeps a worker thread alive forever - trying to start the destination worker DLL.
+
+Additionally, the worker thread tries to call a 'run' function on the destination worker dll. Essentially, provide your "main" entrypoint/logic here:
+```cpp
+void __cdecl run();
+```
+And don't forget to export it at ordinal 1.
 
 ### Mutex Synchornization
 A system-wide mutex (with a constant GUID) is used to make sure the destination dll only has One instance loaded at a time. 
