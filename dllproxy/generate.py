@@ -8,12 +8,8 @@ from pathlib import Path
 from importlib.resources import files
 
 TEMPLATE_DIR = files("dllproxy").joinpath("template")
-VARIABLES = [
-    "PROXY_TARGET_DLL",
-    "EXPORT_STUBS",
-    "REAL_FUNCTION_DECLS",
-    "REAL_FUNCTION_ASSIGNMENTS"
-]
+TEMPLATE_PROJECT_NAME = "DllProxy"
+
 
 def copy_template(output_dir):
     if os.path.exists(output_dir):
@@ -86,29 +82,63 @@ def main():
         for (name, ordinal) in exports
     ]
 
-    files = {
-        "Main.cpp": {
-            "EXPORT_STUBS": "\n".join(export_stubs)
-        },
-        "Config.hpp": {
-            "WORKER_PATH": format_code_path(worker_dll)
-        },
-        "Source.def": {
-            "LIBRARY_NAME": source_dll.name
-        }
-    }
+    project_name = source_dll.stem + "-proxy"
 
-    for file, variables in files.items():
+    files = [
+        (
+            "Main.cpp",
+            {"EXPORT_STUBS": "\n".join(export_stubs)}
+        ),
+        (
+            "Config.hpp",
+            {"WORKER_PATH": format_code_path(worker_dll)}
+        ),
+        (
+            "Source.def",
+            {"LIBRARY_NAME": source_dll.name}
+        ),
+        (
+            f"{TEMPLATE_PROJECT_NAME}.sln",
+            {"PROJECT_NAME": project_name}
+        ),
+        (
+            f"{TEMPLATE_PROJECT_NAME}.vcxproj",
+            {"PROJECT_NAME": project_name}
+        ),
+        (
+            f"{TEMPLATE_PROJECT_NAME}.vcxproj.filters",
+            {"PROJECT_NAME": project_name}
+        ),
+        (
+            f"{TEMPLATE_PROJECT_NAME}.sln",
+            f"{project_name}.sln"
+        ),
+        (
+            f"{TEMPLATE_PROJECT_NAME}.vcxproj",
+            f"{project_name}.vcxproj"
+        ),
+        (
+            f"{TEMPLATE_PROJECT_NAME}.vcxproj.filters",
+            f"{project_name}.vcxproj.filters"
+        ),
+    ]
+
+    for file, variables_or_name in files:
         path = project_dir / file
-        contents = path.read_text()
-        updated_contents = replace_variables(contents, variables)
-        path.write_text(updated_contents)
+        if isinstance(variables_or_name, str):
+            path.rename(path.with_name(variables_or_name))
+        else:
+            variables = variables_or_name
+            contents = path.read_text()
+            updated_contents = replace_variables(contents, variables)
+            path.write_text(updated_contents)
 
     print(f"Proxy DLL project generated at \"{project_dir.absolute()}\"")
 
     if args.build:
-        build(project_dir / "DllProxy.sln", CONFIGURATION, platform)
-        shutil.copy(project_dir / platform / CONFIGURATION / "DllProxy.dll", output)
+        build(project_dir / f"{project_name}.sln", CONFIGURATION, platform)
+        shutil.copy(project_dir / platform / CONFIGURATION /
+                    f"{project_name}.dll", output)
         print(f"Build completed successfully, target is at \"{output}\"")
 
 if __name__ == "__main__":
