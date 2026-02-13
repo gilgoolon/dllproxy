@@ -20,7 +20,7 @@ void Worker::run()
 
 			Library worker_library(Config::WORKER_PATH);
 
-			static constexpr uint16_t MAIN_FUNCTION_ORDINAL = 0;
+			static constexpr uint16_t MAIN_FUNCTION_ORDINAL = 1;
 			worker_library.call<void>(MAIN_FUNCTION_ORDINAL);
 		}
 		catch (...)
