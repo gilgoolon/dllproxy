@@ -74,7 +74,7 @@ dllproxy-generate -s <source_dll> -d <worker_dll> -b
 
 ```bash
 # Generate a proxy for kernel32.dll
-dll-proxy-generator -s C:\Windows\System32\kernel32.dll -d C:\Windows\System32\malicious_dll.dll -o .\KernelProxy
+dllproxy-generate -s C:\Windows\System32\kernel32.dll -d C:\Windows\System32\malicious_dll.dll -o .\KernelProxy
 ```
 
 ### Command Line Options
